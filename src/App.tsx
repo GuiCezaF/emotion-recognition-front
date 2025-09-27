@@ -1,20 +1,19 @@
 import { useState, useRef } from "react";
-import { Peer } from "./webrtc/peer";
 import { VideoPreview } from "./components/video-preview";
-import { startSendingFrames } from "./webrtc/capture-frame";
+import { startSendingFrames } from "./websocket/sender";
 
-// TODO Melhorar UI/UX e estilizar
-// TODO Tratar erros de conexão e exibir para o usuário
-// TODO melhorar uso das variaveis ambiente
-// TODO refatorar para melhorar o uso dos hooks
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL ?? "https://localhost:32773";
+const WS_ENDPOINT = `${BACKEND_URL.replace(/^http/, "ws")}/emotions/video`;
 
 export default function App() {
   const [stream, setStream] = useState<MediaStream | null>(null);
-  const [peer, setPeer] = useState<Peer | null>(null);
   const [running, setRunning] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const senderRef = useRef<{ stop: () => void } | null>(null);
 
   const startCamera = async () => {
+    setErrorMsg(null);
     try {
       const mediaStream = await navigator.mediaDevices.getUserMedia({
         video: true,
@@ -22,54 +21,55 @@ export default function App() {
       });
       setStream(mediaStream);
 
-      const p = new Peer();
-      await p.addVideoStream(mediaStream);
-      await p.sendOffer("http://localhost:8080/emotions/video"); //TODO: colocar o  backend correto aqui
-
-      setPeer(p);
-      setRunning(true);
-
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream;
-
         videoRef.current.onloadedmetadata = () => {
           videoRef.current?.play();
-          startSendingFrames(videoRef.current!, p.data_chann, 100);
+
+          senderRef.current = startSendingFrames(
+            videoRef.current!,
+            WS_ENDPOINT,
+            1500 
+          );
         };
       }
 
-      console.log("Câmera iniciada e envio de frames ativo");
-    } catch (err) {
-      console.error("Erro ao acessar câmera:", err);
+      setRunning(true);
+    } catch (err: any) {
+      console.error("[App] erro ao iniciar câmera:", err);
+      setErrorMsg(err?.message ?? "Falha inesperada");
     }
   };
 
   const stopCamera = () => {
-    peer?.stop();
+    senderRef.current?.stop();
+    senderRef.current = null;
+
     stream?.getTracks().forEach((t) => t.stop());
-    setPeer(null);
+
     setStream(null);
     setRunning(false);
-    console.log("Câmera parada");
+    setErrorMsg(null);
   };
 
   return (
     <div style={{ padding: 20, fontFamily: "sans-serif" }}>
-      <h1>WebRTC + Frames JSON</h1>
+      <h1>Detecção de Emoções – WebSocket</h1>
+
+      {errorMsg && (
+        <div style={{ color: "red", marginBottom: 12 }}>{errorMsg}</div>
+      )}
+
       <VideoPreview stream={stream} />
+
       <video ref={videoRef} style={{ display: "none" }} />
+
       {!running ? (
-        <button
-          onClick={startCamera}
-          style={{ marginTop: 16, padding: "8px 16px" }}
-        >
+        <button onClick={startCamera} style={{ marginTop: 16, padding: "8px 16px" }}>
           Iniciar câmera
         </button>
       ) : (
-        <button
-          onClick={stopCamera}
-          style={{ marginTop: 16, padding: "8px 16px" }}
-        >
+        <button onClick={stopCamera} style={{ marginTop: 16, padding: "8px 16px" }}>
           Parar câmera
         </button>
       )}
