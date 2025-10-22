@@ -4,8 +4,6 @@ type Props = {
   stream: MediaStream | null;
 };
 
-// TODO: estilizar o componente
-
 export function VideoPreview({ stream }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -23,8 +21,11 @@ export function VideoPreview({ stream }: Props) {
     style: {
       width: "100%",
       maxWidth: 640,
+      height: "100%",
       borderRadius: 8,
       background: "#000",
+      objectFit: "cover",
+      objectPosition: "center", 
     },
   });
 }

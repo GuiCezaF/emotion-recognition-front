@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { VideoPreview } from "./components/video-preview";
 import { MdPerson, MdVisibility, MdBarChart } from "react-icons/md";
 import { startSendingFrames } from "./websocket/sender";
@@ -148,8 +148,8 @@ export default function App() {
             </div>
 
             {/* RIGHT PANEL */}
-            <aside className="w-64 flex-shrink-0 flex flex-col gap-4">
-              <div className="bg-gray-200 rounded p-4 flex items-center justify-center h-40">
+            <aside className="w-[50vh] flex-shrink-0 flex flex-col gap-4">
+              <div className="bg-gray-200 rounded p-4 flex items-center justify-center h-60">
                 <VideoPreview stream={stream} />
                 <video ref={videoRef} style={{ display: "none" }} />
               </div>
