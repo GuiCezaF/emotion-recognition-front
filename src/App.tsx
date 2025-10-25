@@ -12,7 +12,7 @@ import { Graphics } from './pages/Graphics';
 
 // URL do backend
 const BACKEND_URL =
-  import.meta.env.VITE_BACKEND_URL ?? "https://localhost:32771";
+  import.meta.env.VITE_BACKEND_URL ?? "https://localhost:32769";
 const WS_ENDPOINT = `${BACKEND_URL.replace(/^http/, "ws")}/emotions/video`;
 
 type ChatMsg = {

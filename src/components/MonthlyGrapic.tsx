@@ -29,7 +29,7 @@ export const MonthlyGraphic = () => {
   }, []);
 
   return (
-    <div className="flex flex-col items-center w-full">
+    <div className="flex flex-col items-center">
       <h2 className="text-xl font-semibold mb-4">Emoções Mensais</h2>
       {loading ? (
         <p>Carregando...</p>
@@ -37,9 +37,7 @@ export const MonthlyGraphic = () => {
         <PieChart
           data={data}
           label={({ dataEntry }) => `${dataEntry.title} (${dataEntry.value}%)`}
-          labelStyle={{ fontSize: 6, fill: "#fff" }}
-          radius={40}
-          labelPosition={60}
+          labelStyle={{ fontSize: "6px", fill: "#fff" }}
         />
       ) : (
         <p>Nenhum dado disponível</p>

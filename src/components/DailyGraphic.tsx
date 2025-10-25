@@ -8,8 +8,12 @@ export const DailyGraphic = () => {
 
   useEffect(() => {
     const today = new Date().toISOString().split("T")[0]; // "2025-10-25"
+    // Next day pois o backend retorna os dados sem o timezone então chega sendo 00:00:00 o que da problema na query
+    // TODO(gabas): brigar com o Guilherme para melhorar a query do backend
 
-    fetchEmotionData(today, today)
+    const nextDay = new Date(new Date(today).setDate(new Date(today).getDate() + 1)).toISOString().split("T")[0];
+    
+    fetchEmotionData(today, nextDay)
       .then((res) => {
         const colored = res.map((item, i) => ({
           ...item,
