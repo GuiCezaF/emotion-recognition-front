@@ -1,30 +1,49 @@
-import { PieChart } from 'react-minimal-pie-chart';
+import { useEffect, useState } from "react";
+import { PieChart } from "react-minimal-pie-chart";
+import { fetchEmotionData } from "../services/fetchEmotionData";
+import type { EmotionData } from "../services/fetchEmotionData";
 
 export const MonthlyGraphic = () => {
-  return (
-    <div className="rounded-2xl p-8 w-[50vh] flex flex-col items-center justify-center bg-white">
-        <h2 className="text-4xl font-semibold mb-6 text-gray-700">
-          Emoções Mensal
-        </h2>
+  const [data, setData] = useState<(EmotionData & { color: string })[]>([]);
+  const [loading, setLoading] = useState(true);
 
+  useEffect(() => {
+    const now = new Date();
+    const start = new Date(now.getFullYear(), now.getMonth(), 1)
+      .toISOString()
+      .split("T")[0];
+    const end = new Date(now.getFullYear(), now.getMonth() + 1, 0)
+      .toISOString()
+      .split("T")[0];
+
+    fetchEmotionData(start, end)
+      .then((res) => {
+        const colored = res.map((item, i) => ({
+          ...item,
+          color: ["#ff6f61", "#6a0572", "#0077b6", "#ffd700"][i % 4],
+        }));
+        setData(colored);
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, []);
+
+  return (
+    <div className="flex flex-col items-center w-full">
+      <h2 className="text-xl font-semibold mb-4">Emoções Mensais</h2>
+      {loading ? (
+        <p>Carregando...</p>
+      ) : data.length ? (
         <PieChart
-          className="h-[40vh] w-full"
-          label={({ dataEntry }) =>
-            `${dataEntry.title} (${Math.round(dataEntry.percentage)}%)`
-          }
-          labelStyle={{
-            fill: 'white',
-            fontSize: '5px',
-            fontFamily: 'Helvetica Neue, sans-serif',
-            textShadow: '1px 1px 5px #000',
-          }}
-          labelPosition={75}
-          data={[
-            { title: 'Happy', value: 25, color: '#ffd700' },
-            { title: 'Sad', value: 50, color: '#0000ff' },
-            { title: 'Angry', value: 25, color: '#f00' },
-          ]}
+          data={data}
+          label={({ dataEntry }) => `${dataEntry.title} (${dataEntry.value}%)`}
+          labelStyle={{ fontSize: 6, fill: "#fff" }}
+          radius={40}
+          labelPosition={60}
         />
-      </div>
-  )
-}
+      ) : (
+        <p>Nenhum dado disponível</p>
+      )}
+    </div>
+  );
+};

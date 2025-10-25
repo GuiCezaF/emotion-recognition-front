@@ -1,30 +1,33 @@
-import { PieChart } from 'react-minimal-pie-chart';
+import { useEffect, useState } from "react";
+import { PieChart } from "react-minimal-pie-chart";
+import { fetchEmotionData } from "../services/fetchEmotionData";
+import type { EmotionData } from "../services/fetchEmotionData";
 
 export const DailyGraphic = () => {
-  return (
-    <div className="rounded-2xl p-8 w-[50vh] flex flex-col items-center justify-center bg-white">
-        <h2 className="text-4xl font-semibold mb-6 text-gray-700">
-          Emoções Diarias
-        </h2>
+  const [data, setData] = useState<(EmotionData & { color: string })[]>([]);
 
-        <PieChart
-          className="h-[40vh] w-full"
-          label={({ dataEntry }) =>
-            `${dataEntry.title} (${Math.round(dataEntry.percentage)}%)`
-          }
-          labelStyle={{
-            fill: 'white',
-            fontSize: '5px',
-            fontFamily: 'Helvetica Neue, sans-serif',
-            textShadow: '1px 1px 5px #000',
-          }}
-          labelPosition={75}
-          data={[
-            { title: 'Happy', value: 25, color: '#ffd700' },
-            { title: 'Sad', value: 50, color: '#0000ff' },
-            { title: 'Fear', value: 25, color: '#3d1931' },
-          ]}
-        />
-      </div>
-  )
-}
+  useEffect(() => {
+    const today = new Date().toISOString().split("T")[0]; // "2025-10-25"
+
+    fetchEmotionData(today, today)
+      .then((res) => {
+        const colored = res.map((item, i) => ({
+          ...item,
+          color: ["#ffd700", "#008f39", "#3d1931", "#ff4500", "#4169e1"][i % 5],
+        }));
+        setData(colored);
+      })
+      .catch(console.error);
+  }, []);
+
+  return (
+    <div className="flex flex-col items-center">
+      <h2 className="text-xl font-semibold mb-4">Emoções Diárias</h2>
+      <PieChart
+        data={data}
+        label={({ dataEntry }) => `${dataEntry.title} (${dataEntry.value}%)`}
+        labelStyle={{ fontSize: "6px", fill: "#fff" }}
+      />
+    </div>
+  );
+};
