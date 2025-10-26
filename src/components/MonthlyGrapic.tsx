@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { PieChart } from "react-minimal-pie-chart";
 import { fetchEmotionData } from "../services/fetchEmotionData";
 import type { EmotionData } from "../services/fetchEmotionData";
+import { UnprocessedData } from "./UnprocessedData";
 
 export const MonthlyGraphic = () => {
   const [data, setData] = useState<(EmotionData & { color: string })[]>([]);
@@ -40,7 +41,7 @@ export const MonthlyGraphic = () => {
           labelStyle={{ fontSize: "6px", fill: "#fff" }}
         />
       ) : (
-        <p>Nenhum dado disponível</p>
+        <UnprocessedData/>
       )}
     </div>
   );

@@ -21,7 +21,8 @@ export async function fetchEmotionData(
     url.searchParams.set("end", end);
 
     const res = await fetch(url);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    if (res.status == 404) return [];
+    if (!res.ok && res.status != 404) throw new Error(`HTTP ${res.status}`);
 
     const json = await res.json();
     if (!Array.isArray(json)) throw new Error("Formato inválido do backend");

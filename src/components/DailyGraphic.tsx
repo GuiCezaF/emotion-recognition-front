@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { PieChart } from "react-minimal-pie-chart";
 import { fetchEmotionData } from "../services/fetchEmotionData";
 import type { EmotionData } from "../services/fetchEmotionData";
+import { UnprocessedData } from "./UnprocessedData";
 
 export const DailyGraphic = () => {
   const [data, setData] = useState<(EmotionData & { color: string })[]>([]);
@@ -27,11 +28,14 @@ export const DailyGraphic = () => {
   return (
     <div className="flex flex-col items-center">
       <h2 className="text-xl font-semibold mb-4">Emoções Diárias</h2>
+      {data.length ? (
       <PieChart
         data={data}
         label={({ dataEntry }) => `${dataEntry.title} (${dataEntry.value}%)`}
         labelStyle={{ fontSize: "6px", fill: "#fff" }}
-      />
+      />) : (
+        <UnprocessedData/>
+      )}
     </div>
   );
 };
