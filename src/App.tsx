@@ -47,7 +47,6 @@ export default function App() {
     wsRef.current = ws;
 
     ws.onopen = () => {
-      console.log("[WS] conexão aberta");
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream;
         videoRef.current.onloadedmetadata = () => {
@@ -61,7 +60,7 @@ export default function App() {
     ws.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
-        if (data.emotion) setEmotion(data.emotion);
+        if (data.emotion && data.emotion != "unknown") setEmotion(data.emotion);
         const random = randomMessages[Math.floor(Math.random() * randomMessages.length)];
         const side = Math.random() > 0.5 ? "left" : "right";
         setMessages((prev) => [...prev, { id: crypto.randomUUID(), text: random, side }]);
