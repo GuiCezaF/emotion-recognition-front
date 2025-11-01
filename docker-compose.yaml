@@ -1,0 +1,9 @@
+services:
+  vite-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: vite-app
+    ports:
+      - "80:80"
+    restart: always

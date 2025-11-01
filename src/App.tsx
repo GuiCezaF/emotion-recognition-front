@@ -9,6 +9,7 @@ import { startSendingFrames } from "./websocket/sender";
 import { Profile } from './pages/Profile';
 import { Acessibility } from "./pages/Acessibility"
 import { Graphics } from './pages/Graphics';
+import { useTranslation } from "react-i18next";
 
 // URL do backend
 const BACKEND_URL =
@@ -27,6 +28,9 @@ export default function App() {
   const [emotion, setEmotion] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMsg[]>([]);
 
+  // tradução
+  const { t } = useTranslation();
+
   const videoRef = useRef<HTMLVideoElement>(null);
   const wsRef = useRef<WebSocket | null>(null);
   const senderRef = useRef<{ stop: () => void } | null>(null);
@@ -34,8 +38,8 @@ export default function App() {
   const randomMessages = [
     "AOOOOOOOOOOOOOOOO POTENCIA",
     "Top demais",
-    "Que isso mano",
-    "Gostosa",
+    // "Que isso mano",
+    // "Gostosa",
     "Bão?????",
   ];
 
@@ -80,32 +84,32 @@ export default function App() {
 
   return (
     <BrowserRouter>
-      <div className="min-h-screen bg-gray-300 font-sans flex h-screen">
+      <div className="min-h-screen bg-gray-300 font-sans flex flex-col md:flex-row h-screen">
         {/* SIDEBAR */}
-        <aside className="w-52 bg-gray-400 text-gray-900 p-6 flex flex-col gap-6">
-          <div className="bg-gray-200 h-24 w-full flex items-center justify-center rounded font-bold text-lg tracking-wide">
+        <aside className="w-full md:w-52 bg-gray-400 text-gray-900 p-4 md:p-6 flex flex-row md:flex-col gap-4 md:gap-6 md:h-screen h-auto">
+          <div className="bg-gray-200 h-16 md:h-24 w-full flex items-center justify-center rounded font-bold text-lg tracking-wide">
             LOGO
           </div>
 
-          <nav className="flex flex-col gap-4 text-lg">
+          <nav className="flex flex-row md:flex-col gap-2 md:gap-4 text-base md:text-lg w-full">
             <NavLink
               to="/"
               end
               className={({ isActive }) =>
-                `flex items-center gap-3 text-left p-2 rounded transition-all duration-200 ${
+                `flex items-center gap-2 md:gap-3 text-left p-2 rounded transition-all duration-200 w-full ${
                   isActive
                     ? "bg-gray-600 text-white shadow-inner"
                     : "hover:bg-gray-300"
                 }`
               }
             >
-              <FaHome/> Home
+              <FaHome/> <span className="hidden sm:inline">Home</span>
             </NavLink>
 
             <NavLink
               to="/perfil"
               className={({ isActive }) =>
-                `flex items-center gap-3 text-left p-2 rounded transition-all duration-200 ${
+                `flex items-center gap-2 md:gap-3 text-left p-2 rounded transition-all duration-200 w-full ${
                   isActive
                     ? "bg-gray-600 text-white shadow-inner"
                     : "hover:bg-gray-300"
@@ -113,13 +117,13 @@ export default function App() {
               }
             >
               <MdPerson className="text-lg" />
-              Perfil
+              <span className="hidden sm:inline">Perfil</span>
             </NavLink>
 
             <NavLink
               to="/acessibilidade"
               className={({ isActive }) =>
-                `flex items-center gap-3 text-left p-2 rounded transition-all duration-200 ${
+                `flex items-center gap-2 md:gap-3 text-left p-2 rounded transition-all duration-200 w-full ${
                   isActive
                     ? "bg-gray-600 text-white shadow-inner"
                     : "hover:bg-gray-300"
@@ -127,13 +131,13 @@ export default function App() {
               }
             >
               <MdVisibility className="text-lg" />
-              Acessibilidade
+              <span className="hidden sm:inline">Acessibilidade</span>
             </NavLink>
 
             <NavLink
               to="/grafico"
               className={({ isActive }) =>
-                `flex items-center gap-3 text-left p-2 rounded transition-all duration-200 ${
+                `flex items-center gap-2 md:gap-3 text-left p-2 rounded transition-all duration-200 w-full ${
                   isActive
                     ? "bg-gray-600 text-white shadow-inner"
                     : "hover:bg-gray-300"
@@ -141,27 +145,27 @@ export default function App() {
               }
             >
               <MdBarChart className="text-lg" />
-              Gráfico
+              <span className="hidden sm:inline">Gráfico</span>
             </NavLink>
           </nav>
         </aside>
 
         {/* MAIN */}
-        <main className="flex-1 p-6 flex flex-col justify-center">
+        <main className="flex-1 p-2 md:p-6 flex flex-col justify-center">
           <Routes>
             {/* HOME (fica no próprio App) */}
             <Route
               path="/"
               element={
-                <div className="flex gap-6 items-stretch h-[80vh]">
+                <div className="flex flex-col md:flex-row gap-4 md:gap-6 items-stretch h-auto md:h-[80vh]">
                   {/* CHAT CARD */}
-                  <div className="flex-1 bg-gray-800 rounded-2xl p-6 shadow-inner relative overflow-hidden">
-                    <div className="absolute inset-4 rounded-xl border-2 border-gray-700 p-6 overflow-auto">
-                      <div className="flex flex-col gap-6 pb-10">
+                  <div className="flex-[2] md:flex-1 bg-gray-800 rounded-2xl p-2 md:p-6 shadow-inner relative overflow-hidden min-h-[60vh] md:min-h-[200px]">
+                    <div className="absolute inset-2 md:inset-4 rounded-xl border-2 border-gray-700 p-2 md:p-6 overflow-auto">
+                      <div className="flex flex-col gap-3 md:gap-6 pb-10">
                         {messages.map((m) => (
                           <div key={m.id} className={`flex ${m.side === "left" ? "justify-start" : "justify-end"}`}>
                             <div
-                              className={`max-w-xs px-4 py-2 rounded-full text-sm bg-white ${
+                              className={`max-w-[90vw] md:max-w-xs px-3 md:px-4 py-2 rounded-full text-xs md:text-sm bg-white ${
                                 m.side === "left" ? "rounded-tr-xl" : "rounded-tl-xl"
                               }`}
                             >
@@ -170,27 +174,24 @@ export default function App() {
                           </div>
                         ))}
                       </div>
-                      <div className="absolute left-1/4 right-1/4 bottom-6">
-                        <div className="h-4 rounded-full bg-gray-500 opacity-80" />
-                      </div>
                     </div>
                   </div>
 
                   {/* RIGHT PANEL */}
-                  <aside className="w-[50vh] flex-shrink-0 flex flex-col gap-4">
-                    <div className="bg-gray-200 rounded p-4 flex items-center justify-center h-60">
+                  <aside className="w-full md:w-[50vh] flex-shrink-0 flex flex-col gap-3 md:gap-4 mt-4 md:mt-0">
+                    <div className="bg-gray-200 rounded p-2 md:p-4 flex items-center justify-center h-36 md:h-60">
                       <VideoPreview stream={stream} />
                       <video ref={videoRef} style={{ display: "none" }} />
                     </div>
 
-                    <div className="bg-gray-200 rounded p-4">
-                      <div className="text-sm text-gray-600">Emoção atual:</div>
-                      <div className="mt-2 bg-white rounded p-3 text-center shadow">
-                        {emotion ?? "—"}
+                    <div className="bg-gray-200 rounded p-2 md:p-4">
+                      <div className="text-xs md:text-sm text-gray-600">Emoção atual:</div>
+                      <div className="mt-2 bg-white rounded p-2 md:p-3 text-center shadow min-h-[24px]">
+                        {emotion ? t(emotion) : "—"}
                       </div>
                     </div>
 
-                    <div className="bg-gray-200 rounded p-3 text-xs text-gray-600">
+                    <div className="bg-gray-200 rounded p-2 md:p-3 text-xs text-gray-600">
                       Frame: {running ? "enviando" : "parado"}
                     </div>
 
@@ -198,14 +199,14 @@ export default function App() {
                       {!running ? (
                         <button
                           onClick={startCamera}
-                          className="w-full py-2 rounded bg-gray-700 text-white"
+                          className="w-full py-2 rounded bg-gray-700 text-white text-sm md:text-base"
                         >
                           Iniciar câmera
                         </button>
                       ) : (
                         <button
                           onClick={stopCamera}
-                          className="w-full py-2 rounded bg-red-600 text-white"
+                          className="w-full py-2 rounded bg-red-600 text-white text-sm md:text-base"
                         >
                           Parar câmera
                         </button>
