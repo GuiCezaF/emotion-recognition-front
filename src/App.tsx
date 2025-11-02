@@ -19,26 +19,40 @@ const BACKEND_URL =
 const WS_ENDPOINT = `${BACKEND_URL.replace(/^http/, "ws")}/emotions/video`;
 const WS_CHAT_ENDPOINT = `${BACKEND_URL.replace(/^http/, "ws")}/emotions/chat`;
 
-type ChatMsg = {
-  id: string;
-  text: string;
-  side: "left" | "right";
-};
-
 export default function App() {
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [running, setRunning] = useState(false);
   const [emotion, setEmotion] = useState<string | null>(null);
-  // const [messages, setMessages] = useState<ChatMsg[]>([]);
 
-  const { messages, sendMessage } = useChatWebSocket(WS_CHAT_ENDPOINT);
+  const { messages: wsMessages, sendMessage, connected } = useChatWebSocket(WS_CHAT_ENDPOINT);
   const [input, setInput] = useState("");
+  const [connectedChat, setConnectedChat] = useState(false);
+  const [localMessages, setLocalMessages] = useState<{ id: string; text: string; side: "left" | "right" }[]>([]);
+
+  const messages = [...wsMessages, ...localMessages];
+
 
   const handleSend = () => {
     if (!input.trim()) return;
-    sendMessage(input);
+    
+    const newMessage = {
+      id: Date.now().toString(),
+      text: input,
+      side: "right" as const,
+    };
+    
+    // Mostra no chat local imediatamente
+    setLocalMessages((prev) => [...prev, newMessage]);
+
+    try {
+      sendMessage(input); // tenta enviar (não quebra se der erro)
+    } catch (err) {
+      console.warn("[Chat] Falha ao enviar via WS, modo offline:", err);
+    }
+
     setInput("");
   };
+
 
   // tradução
   const { t } = useTranslation();
@@ -46,14 +60,6 @@ export default function App() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const wsRef = useRef<WebSocket | null>(null);
   const senderRef = useRef<{ stop: () => void } | null>(null);
-
-  const randomMessages = [
-    "AOOOOOOOOOOOOOOOO POTENCIA",
-    "Top demais",
-    // "Que isso mano",
-    // "Gostosa",
-    "Bão?????",
-  ];
 
   const startCamera = async () => {
     const mediaStream = await navigator.mediaDevices.getUserMedia({ video: true });
@@ -167,12 +173,16 @@ export default function App() {
               path="/"
               element={
                 <div className="flex flex-col md:flex-row gap-4 md:gap-6 items-stretch h-auto md:h-[80vh]">
-                  {/* CHAT CARD */}
-                  <div className="flex-[2] md:flex-1 bg-gray-800 rounded-2xl p-2 md:p-6 shadow-inner relative overflow-hidden min-h-[60vh] md:min-h-[200px]">
-                    <div className="absolute inset-2 md:inset-4 rounded-xl border-2 border-gray-700 p-2 md:p-6 overflow-auto">
-                      <div className="flex flex-col gap-3 md:gap-6 pb-10">
+                  {/* CHAT CARD + INPUT */}
+                  <div className="flex flex-col flex-1 bg-gray-800 rounded-2xl p-2 md:p-6 shadow-inner min-h-[60vh] md:min-h-[200px]">
+                    {/* MENSAGENS */}
+                    <div className="flex-1 overflow-auto rounded-xl border-2 border-gray-700 p-2 md:p-6">
+                      <div className="flex flex-col gap-3 md:gap-6 pb-2">
                         {messages.map((m) => (
-                          <div key={m.id} className={`flex ${m.side === "left" ? "justify-start" : "justify-end"}`}>
+                          <div
+                            key={m.id}
+                            className={`flex ${m.side === "left" ? "justify-start" : "justify-end"}`}
+                          >
                             <div
                               className={`max-w-[90vw] md:max-w-xs px-3 md:px-4 py-2 rounded-full text-xs md:text-sm bg-white ${
                                 m.side === "left" ? "rounded-tr-xl" : "rounded-tl-xl"
@@ -184,21 +194,26 @@ export default function App() {
                         ))}
                       </div>
                     </div>
+
+                    {/* INPUT ABAIXO */}
+                    <div className="flex gap-0 md:gap-2 mt-2">
+                      <input
+                        type="text"
+                        value={input}
+                        onChange={(e) => setInput(e.target.value)}
+                        onKeyDown={(e) => e.key === "Enter" && handleSend()}
+                        placeholder="Digite sua mensagem..."
+                        className="flex-1 px-3 py-2 rounded-l-full text-sm"
+                      />
+                      <button
+                        onClick={handleSend}
+                        className="px-4 py-2 bg-blue-500 text-white rounded-r-full"
+                      >
+                        Enviar
+                      </button>
+                    </div>
                   </div>
 
-                  <div className="flex mt-4">
-                    <input
-                      type="text"
-                      value={input}
-                      onChange={(e) => setInput(e.target.value)}
-                      onKeyDown={(e) => e.key === "Enter" && handleSend()}
-                      placeholder="Digite sua mensagem..."
-                      className="flex-1 px-3 py-2 rounded-l-full text-sm"
-                    />
-                    <button onClick={handleSend} className="px-4 py-2 bg-blue-500 text-white rounded-r-full">
-                      Enviar
-                    </button>
-                  </div>
 
                   {/* RIGHT PANEL */}
                   <aside className="w-full md:w-[50vh] flex-shrink-0 flex flex-col gap-3 md:gap-4 mt-4 md:mt-0">
