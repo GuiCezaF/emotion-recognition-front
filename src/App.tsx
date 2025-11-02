@@ -4,6 +4,7 @@ import { MdPerson, MdVisibility, MdBarChart } from "react-icons/md";
 import { FaHome } from "react-icons/fa";
 import { VideoPreview } from "./components/video-preview";
 import { startSendingFrames } from "./websocket/sender";
+import logo from "../public/logo.png";
 
 // Páginas secundárias
 import { Profile } from './pages/Profile';
@@ -87,8 +88,8 @@ export default function App() {
       <div className="min-h-screen bg-gray-300 font-sans flex flex-col md:flex-row h-screen">
         {/* SIDEBAR */}
         <aside className="w-full md:w-52 bg-gray-400 text-gray-900 p-4 md:p-6 flex flex-row md:flex-col gap-4 md:gap-6 md:h-screen h-auto">
-          <div className="bg-gray-200 h-16 md:h-24 w-full flex items-center justify-center rounded font-bold text-lg tracking-wide">
-            LOGO
+          <div className="h-16 md:h-24 w-full flex items-center justify-center rounded font-bold text-lg tracking-wide">
+            <img src={logo}/>
           </div>
 
           <nav className="flex flex-row md:flex-col gap-2 md:gap-4 text-base md:text-lg w-full">
