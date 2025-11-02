@@ -6,16 +6,13 @@ import { VideoPreview } from "./components/video-preview";
 import { startSendingFrames } from "./websocket/image-sender";
 import logo from "../public/logo.png";
 
-// Páginas secundárias
 import { Profile } from './pages/Profile';
 import { Acessibility } from "./pages/Acessibility"
 import { Graphics } from './pages/Graphics';
 import { useTranslation } from "react-i18next";
 import { useChatWebSocket } from "./websocket/chat-sender";
 
-// URL do backend
-const BACKEND_URL =
-  import.meta.env.VITE_BACKEND_URL;
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 const WS_ENDPOINT = `${BACKEND_URL.replace(/^http/, "ws")}/emotions/video`;
 const WS_CHAT_ENDPOINT = `${BACKEND_URL.replace(/^http/, "ws")}/emotions/chat`;
 
@@ -24,35 +21,20 @@ export default function App() {
   const [running, setRunning] = useState(false);
   const [emotion, setEmotion] = useState<string | null>(null);
 
-  const { messages: wsMessages, sendMessage, connected } = useChatWebSocket(WS_CHAT_ENDPOINT);
+  const { messages: wsMessages, sendMessage } = useChatWebSocket(WS_CHAT_ENDPOINT);
   const [input, setInput] = useState("");
-  const [connectedChat, setConnectedChat] = useState(false);
-  const [localMessages, setLocalMessages] = useState<{ id: string; text: string; side: "left" | "right" }[]>([]);
 
-  const messages = [...wsMessages, ...localMessages];
-
+  const messages = wsMessages;
 
   const handleSend = () => {
     if (!input.trim()) return;
-    
-    const newMessage = {
-      id: Date.now().toString(),
-      text: input,
-      side: "right" as const,
-    };
-    
-    // Mostra no chat local imediatamente
-    setLocalMessages((prev) => [...prev, newMessage]);
-
     try {
-      sendMessage(input); // tenta enviar (não quebra se der erro)
+      sendMessage(input);
     } catch (err) {
       console.warn("[Chat] Falha ao enviar via WS, modo offline:", err);
     }
-
     setInput("");
   };
-
 
   // tradução
   const { t } = useTranslation();
@@ -82,7 +64,7 @@ export default function App() {
     ws.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
-        if (data.emotion && data.emotion != "unknown") setEmotion(data.emotion);
+        if (data.emotion && data.emotion !== "unknown") setEmotion(data.emotion);
       } catch (err) {
         console.error("[WS] erro ao parsear resposta:", err);
       }
@@ -168,7 +150,7 @@ export default function App() {
         {/* MAIN */}
         <main className="flex-1 p-2 md:p-6 flex flex-col justify-center">
           <Routes>
-            {/* HOME (fica no próprio App) */}
+            {/* HOME */}
             <Route
               path="/"
               element={
@@ -184,9 +166,11 @@ export default function App() {
                             className={`flex ${m.side === "left" ? "justify-start" : "justify-end"}`}
                           >
                             <div
-                              className={`max-w-[90vw] md:max-w-xs px-3 md:px-4 py-2 rounded-full text-xs md:text-sm bg-white ${
-                                m.side === "left" ? "rounded-tr-xl" : "rounded-tl-xl"
-                              }`}
+                              className={`max-w-[90vw] md:max-w-xs px-3 md:px-4 py-2 text-xs md:text-sm 
+                                ${m.side === "left"
+                                  ? "bg-gray-200 text-gray-900 rounded-2xl rounded-bl-none self-start"
+                                  : "bg-blue-500 text-white rounded-2xl rounded-br-none self-end"
+                                }`}
                             >
                               {m.text}
                             </div>
@@ -213,7 +197,6 @@ export default function App() {
                       </button>
                     </div>
                   </div>
-
 
                   {/* RIGHT PANEL */}
                   <aside className="w-full md:w-[50vh] flex-shrink-0 flex flex-col gap-3 md:gap-4 mt-4 md:mt-0">
