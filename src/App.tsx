@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route, NavLink } from "react-router-dom";
 import { MdPerson, MdVisibility, MdBarChart } from "react-icons/md";
 import { FaHome } from "react-icons/fa";
 import { VideoPreview } from "./components/video-preview";
-import { startSendingFrames } from "./websocket/sender";
+import { startSendingFrames } from "./websocket/image-sender";
 import logo from "../public/logo.png";
 
 // Páginas secundárias
@@ -11,11 +11,13 @@ import { Profile } from './pages/Profile';
 import { Acessibility } from "./pages/Acessibility"
 import { Graphics } from './pages/Graphics';
 import { useTranslation } from "react-i18next";
+import { useChatWebSocket } from "./websocket/chat-sender";
 
 // URL do backend
 const BACKEND_URL =
-  import.meta.env.VITE_BACKEND_URL ?? "https://localhost:32769";
+  import.meta.env.VITE_BACKEND_URL;
 const WS_ENDPOINT = `${BACKEND_URL.replace(/^http/, "ws")}/emotions/video`;
+const WS_CHAT_ENDPOINT = `${BACKEND_URL.replace(/^http/, "ws")}/emotions/chat`;
 
 type ChatMsg = {
   id: string;
@@ -27,7 +29,16 @@ export default function App() {
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [running, setRunning] = useState(false);
   const [emotion, setEmotion] = useState<string | null>(null);
-  const [messages, setMessages] = useState<ChatMsg[]>([]);
+  // const [messages, setMessages] = useState<ChatMsg[]>([]);
+
+  const { messages, sendMessage } = useChatWebSocket(WS_CHAT_ENDPOINT);
+  const [input, setInput] = useState("");
+
+  const handleSend = () => {
+    if (!input.trim()) return;
+    sendMessage(input);
+    setInput("");
+  };
 
   // tradução
   const { t } = useTranslation();
@@ -66,9 +77,6 @@ export default function App() {
       try {
         const data = JSON.parse(event.data);
         if (data.emotion && data.emotion != "unknown") setEmotion(data.emotion);
-        const random = randomMessages[Math.floor(Math.random() * randomMessages.length)];
-        const side = Math.random() > 0.5 ? "left" : "right";
-        setMessages((prev) => [...prev, { id: crypto.randomUUID(), text: random, side }]);
       } catch (err) {
         console.error("[WS] erro ao parsear resposta:", err);
       }
@@ -176,6 +184,20 @@ export default function App() {
                         ))}
                       </div>
                     </div>
+                  </div>
+
+                  <div className="flex mt-4">
+                    <input
+                      type="text"
+                      value={input}
+                      onChange={(e) => setInput(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && handleSend()}
+                      placeholder="Digite sua mensagem..."
+                      className="flex-1 px-3 py-2 rounded-l-full text-sm"
+                    />
+                    <button onClick={handleSend} className="px-4 py-2 bg-blue-500 text-white rounded-r-full">
+                      Enviar
+                    </button>
                   </div>
 
                   {/* RIGHT PANEL */}
