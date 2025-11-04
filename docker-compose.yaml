@@ -5,5 +5,5 @@ services:
       dockerfile: Dockerfile
     container_name: vite-app
     ports:
-      - "80:80"
+      - "5173:80"
     restart: always
