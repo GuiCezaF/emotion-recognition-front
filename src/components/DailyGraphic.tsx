@@ -32,7 +32,8 @@ export const DailyGraphic = () => {
       <PieChart
         data={data}
         label={({ dataEntry }) => `${dataEntry.title} (${dataEntry.value}%)`}
-        labelStyle={{ fontSize: "6px", fill: "#fff" }}
+        labelStyle={{ fontSize: "4px", fill: "#fff" }}
+        className="w-[50vh]"
       />) : (
         <UnprocessedData/>
       )}
